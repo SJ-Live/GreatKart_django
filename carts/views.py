@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Cart, CartItem
-from store.models import Product
+from store.models import Product, Variation
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
+
 
 # Create your views here.
 
@@ -14,13 +15,22 @@ def _cart_id(request):
     return cart
 
 def add_cart(request, product_id):
-    if request.method == 'POST':
-        color = request.POST['color']
-        size = request.POST['size']
-        print(color, size)
+    product = Product.objects.get(id=product_id) # Get the product
+    product_variation = []
 
-    
-    product = Product.objects.get(id=product_id)
+    if request.method == 'POST':
+        """ This is to maange any kind for product variation the comes from the cart. if it clor = Black then color will be saved in key and 
+        black will be saved in value"""
+        for item in request.POST:
+            key = item
+            value = request.POST[key]
+            # print(key, value)
+            try:
+                variation = Variation.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value )
+                product_variation.append(variation)
+            except:
+                pass
+
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
