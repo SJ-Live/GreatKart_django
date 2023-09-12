@@ -129,7 +129,7 @@
     </section>
 
     <script>
-
+      // csrf_token generator
       function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -150,6 +150,7 @@
       var csrftoken = getCookie('csrftoken');
       var orderID = "{{ order.order_number }}"
       var payment_method = 'PayPal'
+      var redirect_url = "{% url 'order_complete' %}"
       // Render Paypal buttons in the payment cart_item.product.images.url
       paypal.Buttons({
 
@@ -191,16 +192,10 @@
                 status: details.status,
               }),
             })
-            // .then((response) => {
-            //   if (!response.ok) {
-            //     throw new Error(`HTTP error! Status: ${response.status}`);
-            //   }
-
-            //   return response.blob();
-            // })
-            // .then((response) => {
-            //   myImage.src = URL.createObjectURL(response);
-            // });
+            .then((response) => response.json()) 
+            .then((data) => {
+              window.location.href = redirect_url + '?order_number=' + data.order_number + '&payment_id=' + data.transID;
+            });
           }
         });
       }  
