@@ -10,6 +10,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from .forms import ReviewForm
 from django.contrib import messages
+from orders.models import OrderProduct
 
 # Create your views here.
 
@@ -47,10 +48,17 @@ def product_details(request, category_slug, product_slug):
         # exit()
     except Exception as e:
         raise e
+    try:
+            orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
+    except OrderProduct.DoesNotExist:
+            orderproduct = None
+    reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
 
     context ={
             'single_product': single_product,
             'in_cart': in_cart,
+            'orderproduct':orderproduct,
+            'reviews': reviews,
 
     }
 
